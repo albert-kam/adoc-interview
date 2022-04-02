@@ -1,4 +1,4 @@
-package adoc;
+package coda;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

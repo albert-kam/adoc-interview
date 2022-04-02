@@ -1,10 +1,10 @@
-package adoc;
+package coda;
 
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.Lists;
 
-import adoc.CodaCsvConverter.Builder;
+import coda.CodaCsvConverter.Builder;
 
 public class ProjectFactoryV1 implements ProjectFactory {
 
@@ -36,14 +36,15 @@ public class ProjectFactoryV1 implements ProjectFactory {
 	@Override
 	public CodaCsv2jsonConverter.Builder getConverterBuilder() {
 		return CodaCsv2jsonConverter.builder()
-			.withFieldRuleConversion(FieldRuleString.class, (key, value) -> String.format("%s: \"%s\"", key, value))	
+			.withFieldRuleConversion(FieldRuleString.class, (key, value) -> String.format("%s: \"%s\"", key, value))
+			.withFieldRuleConversion(FieldRuleNumber.class, (key, value) -> String.format("%s: \"%s\"", key, value))
 			.withDefaultConversion((key, value) -> String.format("%s: \"%s\"", key, value))
 		;
 	}
 
 	private CodaOutWriter.Builder<?> getWriterImplBuilder() {
 		return CodaFileOutWriter.builder()
-				.withFilenameSuffix("json");
+				.withFilenameSuffix(".json");
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-package adoc;
+package coda;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -9,6 +9,8 @@ import javax.annotation.processing.Generated;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
+
+import coda.WriteRecordResults.Builder;
 
 public class CodaFileOutWriter implements CodaOutWriter {
 

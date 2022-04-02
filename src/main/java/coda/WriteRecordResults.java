@@ -1,4 +1,4 @@
-package adoc;
+package coda;
 
 import java.io.File;
 import java.util.Collections;
@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.annotation.processing.Generated;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
 public class WriteRecordResults {
@@ -17,6 +18,7 @@ public class WriteRecordResults {
 	}
 	
 	public List<File> getOutFiles() {
+		System.out.println("generated files: \n" + Joiner.on("\n").join(outFiles));
 		return outFiles;
 	}
 

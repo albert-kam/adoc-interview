@@ -1,4 +1,4 @@
-package adoc;
+package coda;
 
 public interface CodaOutWriter {
 	public static abstract class Builder<T extends Builder<T>> {

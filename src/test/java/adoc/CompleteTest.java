@@ -17,7 +17,175 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 
+import coda.AppCsv2json;
+import coda.CodaCsv2jsonConverter;
+import coda.CodaCsv2xmlConverter;
+import coda.CodaCsvApacheCommonsParser;
+import coda.CodaCsvConverter;
+import coda.CodaCsvField;
+import coda.CodaCsvParserConfig;
+import coda.CodaCsvRecords;
+import coda.CodaFileOutWriter;
+import coda.ConvertedCodaCsvRecords;
+import coda.FieldRuleEmail;
+import coda.FieldRuleNumber;
+import coda.FieldRulePhone;
+import coda.FieldRuleString;
+import coda.ProjectContext;
+import coda.ProjectFactory;
+import coda.Version;
+import coda.WriteRecordResults;
+
+/**
+ * - builder pattern
+ * - IoC -- factory pattern
+ * - singleton pattern
+ * - strategy pattern
+ * - SRP
+ * - immutability -- getter + never return the modifiable instance like the private List
+ * - defensive programming
+ * @author moonblade
+ *
+ */
 public class CompleteTest {
+
+	@Test
+	public void testComplete_withoutSpecificFieldTypeRule() {
+		File file = AppCsv2json.builder()
+				.withFileValidators(Lists.newArrayList(
+						f -> checkState(f.exists() && f.isFile(), "non existing file %s", f.getAbsolutePath()),
+						f -> checkState(f.getName().toLowerCase().endsWith(".csv"))
+					))
+				.build()
+				.loadFile("src/test/resources/input.csv");
+		
+		CodaCsvRecords recs = CodaCsvApacheCommonsParser.builder()
+				.withConfiguration(
+						CodaCsvParserConfig.builder()
+							.withDefaultFieldRule(FieldRuleString.builder().build())
+							.withFirstRowIsHeaderLine(true)
+							.withValueSeparator(',')
+						.build())
+				.build()
+				.parse(file);
+		
+		ConvertedCodaCsvRecords converted = CodaCsv2jsonConverter.builder()
+				.withDefaultConversion((key, value) -> String.format("%s: \"%s\"", key, value))
+				.build()
+				.convert(recs);
+		
+		WriteRecordResults results = CodaFileOutWriter.builder()
+				.withFilenameSuffix(".json")
+				.build()
+				.write(converted);
+		
+		assertEquals(getFileContents(results.getOutFiles()), 
+				getFileContents(file("src/test/resources/output_line1.txt"),
+						file("src/test/resources/output_line2.txt")));
+	}
+	
+	@Test
+	public void testComplete_withStringAndNumberFieldTypeRule() {
+		File file = AppCsv2json.builder()
+				.withFileValidators(Lists.newArrayList(
+						f -> checkState(f.exists() && f.isFile(), "non existing file %s", f.getAbsolutePath()),
+						f -> checkState(f.getName().toLowerCase().endsWith(".csv"))
+					))
+				.build()
+				.loadFile("src/test/resources/input.csv");
+		
+		CodaCsvRecords recs = CodaCsvApacheCommonsParser.builder()
+				.withConfiguration(
+						CodaCsvParserConfig.builder()
+							.withDefaultFieldRule(FieldRuleString.builder().build())
+							.withFirstRowIsHeaderLine(true)
+							.withValueSeparator(',')
+							.withFields(Lists.newArrayList(
+									CodaCsvField.of("first_name", 
+											FieldRuleString.builder()
+												.withRequired(true)
+												.build()),
+									CodaCsvField.of("zip", 
+											FieldRuleNumber.builder()
+												.withIntegerMode(true)
+												.build())
+							))
+						.build())
+				.build()
+				.parse(file);
+		
+		ConvertedCodaCsvRecords converted = CodaCsv2jsonConverter.builder()
+				.withFieldRuleConversion(FieldRuleString.class, (key, value) -> String.format("%s: \"%s\"", key, value))	
+				.withFieldRuleConversion(FieldRuleNumber.class, (key, value) -> String.format("%s: %s", key, value))
+				.withDefaultConversion((key, value) -> String.format("%s: \"%s\"", key, value))
+				.build()
+				.convert(recs);
+		
+		WriteRecordResults results = CodaFileOutWriter.builder()
+				.withFilenameSuffix(".json")
+				.build()
+				.write(converted);
+		
+		assertEquals(getFileContents(results.getOutFiles()), 
+				getFileContents(file("src/test/resources/output_line1_number.txt"),
+						file("src/test/resources/output_line2_number.txt")));
+	}
+
+	@Test
+	public void testComplete_withEmailAndPhoneFieldTypeRule() {
+		File file = AppCsv2json.builder()
+				.withFileValidators(Lists.newArrayList(
+						f -> checkState(f.exists() && f.isFile(), "non existing file %s", f.getAbsolutePath()),
+						f -> checkState(f.getName().toLowerCase().endsWith(".csv"))
+					))
+				.build()
+				.loadFile("src/test/resources/input.csv");
+		
+		FieldRulePhone fieldRulePhone = FieldRulePhone.builder()
+			.withPattern("^\\d{3}-\\d{3}-\\d{4}$")
+			.build();
+		CodaCsvRecords recs = CodaCsvApacheCommonsParser.builder()
+				.withConfiguration(
+						CodaCsvParserConfig.builder()
+							.withDefaultFieldRule(FieldRuleString.builder().build())
+							.withFirstRowIsHeaderLine(true)
+							.withValueSeparator(',')
+							.withFields(Lists.newArrayList(
+									CodaCsvField.of("first_name", 
+											FieldRuleString.builder()
+												.withRequired(true)
+												.build()),
+									CodaCsvField.of("zip", 
+											FieldRuleNumber.builder()
+												.withIntegerMode(true)
+												.build()),
+									CodaCsvField.of("phone1", fieldRulePhone),
+									CodaCsvField.of("phone2", fieldRulePhone),
+									CodaCsvField.of("email", 
+											FieldRuleEmail.builder()
+												.withExcludedDomains("yahoo.com", "hacker.com")
+												.build())
+							))
+						.build())
+				.build()
+				.parse(file);
+		
+		ConvertedCodaCsvRecords converted = CodaCsv2jsonConverter.builder()
+				.withFieldRuleConversion(FieldRuleString.class, (key, value) -> String.format("%s: \"%s\"", key, value))	
+				.withFieldRuleConversion(FieldRuleNumber.class, (key, value) -> String.format("%s: %s", key, value))
+				.withDefaultConversion((key, value) -> String.format("%s: \"%s\"", key, value))
+				.build()
+				.convert(recs);
+		
+		WriteRecordResults results = CodaFileOutWriter.builder()
+				.withFilenameSuffix(".json")
+				.build()
+				.write(converted);
+		
+		assertEquals(getFileContents(results.getOutFiles()), 
+				getFileContents(file("src/test/resources/output_line1_number.txt"),
+						file("src/test/resources/output_line2_number.txt")));
+	}
 
 	@Test
 	public void testAppV1() {
@@ -76,14 +244,17 @@ public class CompleteTest {
 					.withFieldRuleConversion(FieldRuleEmail.class, (key, value) -> String.format("%s: \"%s\"", key, value))
 					.build();
 		
-		
+
+		FieldRulePhone fieldRulePhone = FieldRulePhone.builder()
+				.withPattern("^\\d{3}-\\d{3}-\\d{4}$")
+				.build();
 		assertEquals(getFileContents(
 				factory.getOutWriter()
 					.write(csvConverter.convert(factory.getParserImpl(
 									CodaCsvField.of("first_name", FieldRuleString.builder().build()),
 									CodaCsvField.of("zip", FieldRuleNumber.builder().build()),
-									CodaCsvField.of("phone1", FieldRulePhone.builder().build()),
-									CodaCsvField.of("phone2", FieldRulePhone.builder().build()),
+									CodaCsvField.of("phone1", fieldRulePhone),
+									CodaCsvField.of("phone2", fieldRulePhone),
 									CodaCsvField.of("email", FieldRuleEmail.builder().build())
 								)
 								.parse(factory.getAppCsv2json()
@@ -106,13 +277,16 @@ public class CompleteTest {
 					.withFieldRuleConversion(FieldRuleEmail.class, (key, value) -> String.format("<%s>%s</%s>", key, value, key))
 					.build();
 		
+		FieldRulePhone fieldRulePhone = FieldRulePhone.builder()
+				.withPattern("^\\d{3}-\\d{3}-\\d{4}$")
+				.build();
 		assertEquals(getFileContents(
 				factory.getOutWriter()
 					.write(xmlConverter.convert(factory.getParserImpl(
 									CodaCsvField.of("first_name", FieldRuleString.builder().build()),
 									CodaCsvField.of("zip", FieldRuleNumber.builder().build()),
-									CodaCsvField.of("phone1", FieldRulePhone.builder().build()),
-									CodaCsvField.of("phone2", FieldRulePhone.builder().build()),
+									CodaCsvField.of("phone1", fieldRulePhone),
+									CodaCsvField.of("phone2", fieldRulePhone),
 									CodaCsvField.of("email", FieldRuleEmail.builder().build())
 								)
 								.parse(factory.getAppCsv2json()

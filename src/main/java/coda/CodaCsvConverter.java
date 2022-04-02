@@ -1,4 +1,4 @@
-package adoc;
+package coda;
 
 public interface CodaCsvConverter {
 

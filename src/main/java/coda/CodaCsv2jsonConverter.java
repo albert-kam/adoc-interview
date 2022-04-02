@@ -1,4 +1,4 @@
-package adoc;
+package coda;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -67,6 +67,6 @@ public class CodaCsv2jsonConverter implements CodaCsvConverter {
 	}
 
 	private BiFunction<String, String, String> getFormatter(CodaCsvRecordCell cell) {
-		return rules.getOrDefault(cell.getFieldRule(), defaultConversionFun);
+		return rules.getOrDefault(cell.getFieldRule().getClass(), defaultConversionFun);
 	}
 }

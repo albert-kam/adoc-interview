@@ -1,6 +1,6 @@
-package adoc;
+package coda;
 
-import adoc.CodaCsvConverter.Builder;
+import coda.CodaCsvConverter.Builder;
 
 public class ProjectFactoryV2 implements ProjectFactory {
 	private static volatile ProjectFactoryV2 instance;
@@ -39,13 +39,15 @@ public class ProjectFactoryV2 implements ProjectFactory {
 	}
 
 	@Override
-	public adoc.CodaCsvParser.Builder<?> getParserBuilder(CodaCsvField... fields) {
+	public coda.CodaCsvParser.Builder<?> getParserBuilder(CodaCsvField... fields) {
 		return v1.getParserBuilder(fields);
 	}
 
 	@Override
 	public CodaOutWriter getOutWriter() {
-		return v1.getOutWriter();
+		return CodaFileOutWriter.builder()
+				.withFilenameSuffix(".xml")
+				.build();
 	}
 
 	@Override
@@ -54,7 +56,7 @@ public class ProjectFactoryV2 implements ProjectFactory {
 	}
 
 	@Override
-	public adoc.CodaCsvParserConfig.Builder getParserConfigBuilder(CodaCsvField... fields) {
+	public coda.CodaCsvParserConfig.Builder getParserConfigBuilder(CodaCsvField... fields) {
 		return v1.getParserConfigBuilder(fields)
 				.withValueSeparator(';');
 	}

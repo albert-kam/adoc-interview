@@ -1,6 +1,6 @@
-package adoc;
+package coda;
 
-import adoc.CodaCsvParserConfig.Builder;
+import coda.CodaCsvParserConfig.Builder;
 
 public interface ProjectFactory {
 
