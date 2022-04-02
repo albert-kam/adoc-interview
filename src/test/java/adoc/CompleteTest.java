@@ -49,6 +49,15 @@ import coda.WriteRecordResults;
  */
 public class CompleteTest {
 
+	/**
+	 *
+1. A user must be able to run a program and feed it a location to a file that has CSV data
+2. The system must be able to parse each line of the CSV into a record of data
+3. The system must output the formatted record to a separate text file for each row of data (json 
+or xml format)
+4. Each formatted record should include the name, and value for each of the record's fields with 
+support
+	 */
 	@Test
 	public void testComplete_withoutSpecificFieldTypeRule() {
 		File file = AppCsv2json.builder()
@@ -83,7 +92,11 @@ public class CompleteTest {
 				getFileContents(file("src/test/resources/output_line1.txt"),
 						file("src/test/resources/output_line2.txt")));
 	}
-	
+
+	/**
+5. Extend the formatted record to also include either the String or Number data type for each of 
+the record's fields with support
+	 */
 	@Test
 	public void testComplete_withStringAndNumberFieldTypeRule() {
 		File file = AppCsv2json.builder()
@@ -131,6 +144,10 @@ public class CompleteTest {
 						file("src/test/resources/output_line2_number.txt")));
 	}
 
+	/**
+6. Extend the formatted record to also include the Phone number and Email address datatypes for 
+each record
+	 */
 	@Test
 	public void testComplete_withEmailAndPhoneFieldTypeRule() {
 		File file = AppCsv2json.builder()
@@ -187,6 +204,9 @@ public class CompleteTest {
 						file("src/test/resources/output_line2_number.txt")));
 	}
 
+	/**
+	 * assuming there's a project-wide configuration
+	 */
 	@Test
 	public void testAppV1() {
 		ProjectFactory factory = ProjectContext.get()
@@ -234,6 +254,9 @@ public class CompleteTest {
 		return new File(path);
 	}
 
+	/**
+	 * adding a custom behavior on an existing project-wide configuration
+	 */
 	@Test
 	public void testAppV1_withEmailAndPhoneNumberFieldRules() {
 		ProjectFactory factory = ProjectContext.get()
@@ -265,6 +288,9 @@ public class CompleteTest {
 					file("src/test/resources/output_line2.txt")));
 	}
 
+	/**
+	 * assuming there's a new project-wide configuration aka V2 + custom to output to xml
+	 */
 	@Test
 	public void testAppV2_withXmlWriterQuickTest() {
 		ProjectFactory factory = ProjectContext.get()
