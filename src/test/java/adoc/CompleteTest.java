@@ -66,7 +66,7 @@ public class CompleteTest {
 		return new File(path);
 	}
 
-//	@Test
+	@Test
 	public void testAppV1_withEmailAndPhoneNumberFieldRules() {
 		ProjectFactory factory = ProjectContext.get()
 				.getFactory(Version.V1);
@@ -87,43 +87,39 @@ public class CompleteTest {
 									CodaCsvField.of("email", FieldRuleEmail.builder().build())
 								)
 								.parse(factory.getAppCsv2json()
-											.loadFile("input.csv"))))
+											.loadFile("src/test/resources/input.csv"))))
 					.getOutFiles()
 			), 
-			getFileContents(file("output_line1.txt"),
-					file("output_line2.txt")));
+			getFileContents(file("src/test/resources/output_line1.txt"),
+					file("src/test/resources/output_line2.txt")));
 	}
 
-//	@Test
-//	public void testAppV2_withXmlWriterQuickTest() {
-//		ProjectFactory factory = ProjectContext.get()
-//				.getFactory(Version.V2);
-//		
-//		CodaCsvConverter xmlConverter = CodaCsvConverter.builder()
-//			.withConverterImpl(CodaCsv2xmlConverter.builder()
-//					.withFieldRuleConversion(FieldRuleString.class, (key, value) -> String.format("<%s>%s</%s>", key, value, key))	
-//					.withDefaultConversion((key, value) -> String.format("<%s>%s</%s>", key, value, key))
-//					.withFieldRuleConversion(FieldRulePhone.class, (key, value) -> String.format("<%s>%s</%s>", key, value, key))
-//					.withFieldRuleConversion(FieldRuleEmail.class, (key, value) -> String.format("<%s>%s</%s>", key, value, key))
-//					.build())
-//			.build();
-//		
-//		assertEquals(getFileContents(
-//				factory.getOutWriter()
-//					.write(xmlConverter.convert(CodaCsvParser.builder()
-//								.withParserImpl(factory.getParserImpl(
-//										CodaCsvField.of("first_name", FieldRuleString.builder().build()),
-//										CodaCsvField.of("zip", FieldRuleNumber.builder().build()),
-//										CodaCsvField.of("phone1", FieldRulePhone.builder().build()),
-//										CodaCsvField.of("phone2", FieldRulePhone.builder().build()),
-//										CodaCsvField.of("email", FieldRuleEmail.builder().build())
-//								))
-//								.build()
-//								.parse(factory.getAppCsv2json()
-//											.loadFile("input.csv"))))
-//					.getOutFiles()), 
-//			getFileContents(file("output_line1.txt"),
-//					file("output_line2.txt")));
-//	}
+	@Test
+	public void testAppV2_withXmlWriterQuickTest() {
+		ProjectFactory factory = ProjectContext.get()
+				.getFactory(Version.V2);
+		
+		CodaCsvConverter xmlConverter = CodaCsv2xmlConverter.builder()
+					.withFieldRuleConversion(FieldRuleString.class, (key, value) -> String.format("<%s>%s</%s>", key, value, key))	
+					.withDefaultConversion((key, value) -> String.format("<%s>%s</%s>", key, value, key))
+					.withFieldRuleConversion(FieldRulePhone.class, (key, value) -> String.format("<%s>%s</%s>", key, value, key))
+					.withFieldRuleConversion(FieldRuleEmail.class, (key, value) -> String.format("<%s>%s</%s>", key, value, key))
+					.build();
+		
+		assertEquals(getFileContents(
+				factory.getOutWriter()
+					.write(xmlConverter.convert(factory.getParserImpl(
+									CodaCsvField.of("first_name", FieldRuleString.builder().build()),
+									CodaCsvField.of("zip", FieldRuleNumber.builder().build()),
+									CodaCsvField.of("phone1", FieldRulePhone.builder().build()),
+									CodaCsvField.of("phone2", FieldRulePhone.builder().build()),
+									CodaCsvField.of("email", FieldRuleEmail.builder().build())
+								)
+								.parse(factory.getAppCsv2json()
+											.loadFile("src/test/resources/input.csv"))))
+					.getOutFiles()), 
+			getFileContents(file("src/test/resources/output_line1_xml.txt"),
+					file("src/test/resources/output_line2_xml.txt")));
+	}
 
 }
