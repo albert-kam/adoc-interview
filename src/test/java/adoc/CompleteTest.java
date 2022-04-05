@@ -44,6 +44,7 @@ import coda.WriteRecordResults;
  * - SRP
  * - immutability -- getter + never return the modifiable instance like the private List
  * - defensive programming
+ * - loosely coupling
  * @author moonblade
  *
  */
